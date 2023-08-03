@@ -8,6 +8,7 @@ import adafruit_trellis_express
 import adafruit_adxl34x
 import neopixel
 import digitalio
+import storage
 
 
 ################################
@@ -37,6 +38,7 @@ def wheel(pos): # Input a value 0 to 255 to get a color value.
 
 # Clear all pixels
 trellis.pixels._neopixel.fill(0)
+trellis.pixels._neopixel.brightness = 0.1
 trellis.pixels._neopixel.show()
 
 # Test of procedularly filling in colors
@@ -77,15 +79,41 @@ def is_pressed_change_brightness_button(pressed):
 # Set up outputs for neopixel rings
 #####
 # Set the NeoPixel brightness
-BRIGHTNESS = 0.5
+BRIGHTNESS = 0.99
 brightness_options = [0.25, 0.5, 0.75, 0.99]
 NUM_OF_LEDS = 24 # Change to 24 when using the rings
 
 headlight_1 = neopixel.NeoPixel(board.SDA, NUM_OF_LEDS, brightness=BRIGHTNESS, auto_write=True)
 headlight_2 = neopixel.NeoPixel(board.SCL, NUM_OF_LEDS, brightness=BRIGHTNESS, auto_write=True)
 
-headlight_1.fill(0)
-headlight_2.fill(0)
+# Start with headlights on the color for blue (0, 57, 198)
+default_headlight_color_tuple = (0, 57, 198)
+print(default_headlight_color_tuple)
+headlight_1.fill(default_headlight_color_tuple)
+headlight_2.fill(default_headlight_color_tuple)
+headlight_1.show()
+headlight_2.show()
+trellis.pixels[7,0] = default_headlight_color_tuple
+
+##############
+# Test of saving current color tuple to file to reload in case of reset
+##############
+
+# False means that neotrellis can write to circuit folder, BUT NOT WINDOWS
+# After done writing file, need to call storage.remount with True
+#storage.remount("/", False)
+
+'''
+storage.remount("/", False)
+try:
+    with open("/color.txt", "a") as fp:
+        fp.write("(1,2,3)")
+        fp.flush()        
+except OSError as e:  # Typically when the filesystem isn't writeable...
+    print("unable to write file")
+fp.close()
+storage.remount("/", True)
+'''
 
 def cycle_brightness():
     global BRIGHTNESS
